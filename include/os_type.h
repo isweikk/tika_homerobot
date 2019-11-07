@@ -1,53 +1,48 @@
 #ifndef __OS_TYPE_H_
 #define __OS_TYPE_H_
 
-
-// #if defined(__cplusplus)
-// extern "C" {
-// #endif
-
 #define OS_API __attribute__ ((visibility("default")))
 
-typedef char       CHAR;
-typedef short      SHORT;
-typedef int        INT;
-typedef long long  LONG;
+typedef char       INT8;
+typedef short      INT16;
+typedef int        INT32;
+typedef long long  INT64;
 
-typedef unsigned char        UCHAR;
-typedef unsigned short       USHORT;
-typedef unsigned int         UINT;
-typedef unsigned long long   ULONG;
+typedef unsigned char        UINT8;
+typedef unsigned short       UINT16;
+typedef unsigned int         UINT32;
+typedef unsigned long long   UINT64;
 
 
-#define OS_CHAR_MAX         127
-#define OS_CHAR_MIN         (-127 - (-1))
+#define OS_INT8_MAX         127
+#define OS_INT8_MIN         (-127 - (-1))
 
-#define OS_UCHAR_MAX        255
-#define OS_UCHAR_MIN        0
+#define OS_UINT8_MAX        255
+#define OS_UINT8_MIN        0
 
-#define OS_SHORT_MAX        32767
-#define OS_SHORT_MIN        ((-32767) - (-1))
+#define OS_INT16_MAX        32767
+#define OS_INT16_MIN        ((-32767) - (-1))
 
-#define OS_USHORT_MAX       65535
-#define OS_USHORT_MIN       0
+#define OS_UINT16_MAX       65535
+#define OS_UINT16_MIN       0
 
-#define OS_INT_MAX          2147483647
-#define OS_INT_MIN          (-2147483647 - (-1))
+#define OS_INT32_MAX        2147483647
+#define OS_INT32_MIN        (-2147483647 - (-1))
 
-#define OS_UINT_MAX         4294967295
-#define OS_UINT_MIN         0
+#define OS_UINT32_MAX       4294967295
+#define OS_UINT32_MIN       0
 
-#define OS_LONG_MAX         (9223372036854775807)
-#define OS_LONG_MIN         (-9223372036854775807 - (-1))
+#define OS_INT64_MAX        (9223372036854775807)
+#define OS_INT64_MIN        (-9223372036854775807 - (-1))
 
-#define OS_ULONG_MAX        18446744073709551615
-#define OS_ULONG_MIN        0
+#define OS_UINT64_MAX       18446744073709551615
+#define OS_UINT64_MIN       0
 
 /* define invalid value of int */
-#define NULL_UCHAR          255
-#define NULL_USHORT         65535
-#define NULL_UINT           4294967295
-#define NULL_ULONG          18446744073709551615
+#define NULL_UINT8          255
+#define NULL_UINT16         65535
+#define NULL_UINT32         4294967295
+#define NULL_UINT64         18446744073709551615
 
 /* define invalid pointer */
 #if defined(__cplusplus)
@@ -69,30 +64,28 @@ typedef unsigned long long   ULONG;
 
 #if 1//(OS_ARCH_ENDIAN == OS_ARCH_LITTLE_ENDIAN)
 
-#define osConvertHostToNetwork32(_host) \
-      ((((_host) & 0x000000ff) << 24) | \
-             (((_host) & 0x0000ff00) <<  8) | \
-             (((_host) & 0x00ff0000) >>  8) | \
-             (((_host) & 0xff000000) >> 24))
-#define osConvertHostToNetwork16(_host) \
-       ((((_host) & 0x00ff) << 8) | \
-             (((_host) & 0xff00) >> 8))
+#define OS_HOST_TO_NET32(_host) \
+    ((((_host) & 0x000000ff) << 24) | \
+    (((_host) & 0x0000ff00) <<  8) | \
+    (((_host) & 0x00ff0000) >>  8) | \
+    (((_host) & 0xff000000) >> 24))
+    
+#define OS_HOST_TO_NET16(_host)  ((((_host) & 0x00ff) << 8) | (((_host) & 0xff00) >> 8))
 
-#define osConvertNetworkToHost32(_network) \
+#define OS_NET_TO_HOST32(_network) \
     ((((_network) & 0x000000ff) << 24) | \
-             (((_network) & 0x0000ff00) <<  8) | \
-             (((_network) & 0x00ff0000) >>  8) | \
-             (((_network) & 0xff000000) >> 24))
-#define osConvertNetworkToHost16(_network) \
-    ((((_network) & 0x00ff) << 8) | \
-             (((_network) & 0xff00) >> 8))
+    (((_network) & 0x0000ff00) <<  8) | \
+    (((_network) & 0x00ff0000) >>  8) | \
+    (((_network) & 0xff000000) >> 24))
+    
+#define OS_NET_TO_HOST16(_network) ((((_network) & 0x00ff) << 8) | (((_network) & 0xff00) >> 8))
 
 #elif (OS_ARCH_ENDIAN == OS_ARCH_BIG_ENDIAN)
 
-#define osConvertHostToNetwork32(_host) (_host)
-#define osConvertNetworkToHost32(_network) (_network)
-#define osConvertHostToNetwork16(_host) (_host)
-#define osConvertNetworkToHost16(_network) (_network)
+#define OS_HOST_TO_NET16(_host) (_host)
+#define OS_HOST_TO_NET32(_host) (_host)
+#define OS_NET_TO_HOST16(_network) (_network)
+#define OS_NET_TO_HOST32(_network) (_network)
 
 #endif
 
@@ -208,8 +201,5 @@ typedef unsigned long long   ULONG;
 
 #endif //default log
 
-// #if defined(__cplusplus)
-// }
-// #endif
 
 #endif	//__OS_TYPE_H
