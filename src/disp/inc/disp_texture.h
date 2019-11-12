@@ -21,16 +21,16 @@ class DispTexture
         void closeWindow();
         
         //Loads image at specified path
-        bool loadFromFile( std::string path );
+        UINT32 createTextureFromFile(std::string path );
         
         //Creates image from font string
-        bool loadFromRenderedText( std::string textureText, SDL_Color textColor );
+        UINT32 createTextureFromRenderText(std::string textureText, SDL_Color textColor );
 
         //Creates blank texture
-        bool createBlank( int width, int height, SDL_TextureAccess = SDL_TEXTUREACCESS_STREAMING );
+        UINT32 createTexture(int width, int height, SDL_TextureAccess access);
 
         //Deallocates texture
-        void freeBlank();
+        void freeTexture();
 
         //Set color modulation
         void setColor( Uint8 red, Uint8 green, Uint8 blue );
@@ -61,17 +61,17 @@ class DispTexture
 
     //private:
         //The actual hardware texture
-        SDL_Window* mWindow;
-        SDL_Renderer* mRenderer;
-        SDL_Texture* mTexture;
-        TTF_Font* mFont;
+        SDL_Window* window_;
+        SDL_Renderer* renderer_;
+        SDL_Texture* texture_;
+        TTF_Font* font_;
         
-        void* mPixels;
-        int mPitch;
+        void* pixels_;
+        int pitch_;
 
         //Image dimensions
-        int mWidth;
-        int mHeight;
+        int width_;
+        int height_;
 };
 
 
