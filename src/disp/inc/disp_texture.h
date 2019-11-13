@@ -10,68 +10,74 @@
 //Texture wrapper class
 class DispTexture
 {
-    public:
-        //Initializes variables
-        DispTexture();
+public:
+    //Initializes variables
+    DispTexture();
 
-        //Deallocates memory
-        ~DispTexture();
+    //Deallocates memory
+    ~DispTexture();
 
-        UINT32 openWindow();
-        void closeWindow();
-        
-        //Loads image at specified path
-        UINT32 createTextureFromFile(std::string path );
-        
-        //Creates image from font string
-        UINT32 createTextureFromRenderText(std::string textureText, SDL_Color textColor );
+    UINT32 openWindow();
+    void closeWindow();
 
-        //Creates blank texture
-        UINT32 createTexture(int width, int height, SDL_TextureAccess access);
+    //Loads image at specified path
+    UINT32 createTextureFromFile(std::string path);
 
-        //Deallocates texture
-        void freeTexture();
+    //Creates image from font string
+    UINT32 createTextureFromRenderText(std::string textureText, SDL_Color textColor);
 
-        //Set color modulation
-        void setColor( Uint8 red, Uint8 green, Uint8 blue );
+    //Creates blank texture
+    UINT32 createTexture(INT32 width, INT32 height, SDL_TextureAccess access);
 
-        //Set blending
-        void setBlendMode( SDL_BlendMode blending );
+    //Deallocates texture
+    void freeTexture();
 
-        //Set alpha modulation
-        void setAlpha( Uint8 alpha );
-        
-        //Renders texture at given point
-        void render( int x, int y, SDL_Rect* clip = NULL, double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE );
+    //Clear window
+    void clearScreen();
 
-        //Set self as render target
-        void setAsRenderTarget();
+    //update screen
+    void updateScreen();
 
-        //Gets image dimensions
-        int getWidth();
-        int getHeight();
+    //Set color modulation
+    void setColor(UINT8 red, UINT8 green, UINT8 blue);
 
-        //Pixel manipulators
-        bool lockTexture();
-        bool unlockTexture();
-        void* getPixels();
-        void copyPixels( void* pixels );
-        int getPitch();
-        Uint32 getPixel32( unsigned int x, unsigned int y );
+    //Set blending
+    void setBlendMode(SDL_BlendMode blending);
 
-    //private:
-        //The actual hardware texture
-        SDL_Window* window_;
-        SDL_Renderer* renderer_;
-        SDL_Texture* texture_;
-        TTF_Font* font_;
-        
-        void* pixels_;
-        int pitch_;
+    //Set alpha modulation
+    void setAlpha(UINT8 alpha);
 
-        //Image dimensions
-        int width_;
-        int height_;
+    //Renders texture at given point
+    void render(INT32 x, INT32 y, SDL_Rect* clip = NULL, double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
+
+    //Set self as render target
+    void setAsRenderTarget();
+
+    //Gets image dimensions
+    INT32 getWidth();
+    INT32 getHeight();
+
+    //Pixel manipulators
+    UINT32 lockTexture();
+    UINT32 unlockTexture();
+    void* getPixels();
+    void copyPixels(void* pixels);
+    INT32 getPitch();
+    INT32 getPixel32(INT32 x, INT32 y);
+
+private:
+    //The actual hardware texture
+    SDL_Window* window_;
+    SDL_Renderer* renderer_;
+    SDL_Texture* texture_;
+    TTF_Font* font_;
+
+    void* pixels_;
+    INT32 pitch_;
+
+    //Image dimensions
+    INT32 width_;
+    INT32 height_;
 };
 
 

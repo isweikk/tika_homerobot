@@ -45,7 +45,7 @@ UINT32 DispTexture::openWindow()
     }
 
     //Create window
-    window_ = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+    window_ = SDL_CreateWindow("Tika", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
         SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_FULLSCREEN);
     if (window_ == NULL_PTR) {
         closeWindow();
@@ -121,6 +121,7 @@ UINT32 DispTexture::createTextureFromFile(std::string path)
         SDL_FreeSurface(formattedSurface);
         SDL_FreeSurface(loadedSurface);
         printf("Unable to create blank texture! SDL Error: %s\n", SDL_GetError());
+        return OS_ERROR;
     }
 
     //Enable blending on texture
@@ -138,7 +139,7 @@ UINT32 DispTexture::createTextureFromFile(std::string path)
 
     //Get pixel data in editable format
     UINT32 *pixels = (UINT32 *)pixels_;
-    int pixelCount = (pitch_ / 4) * height_;
+    INT32 pixelCount = (pitch_ / 4) * height_;
 
     //Map colors
     UINT32 colorKey = SDL_MapRGB(formattedSurface->format, 0, 0xFF, 0xFF);
@@ -160,7 +161,7 @@ UINT32 DispTexture::createTextureFromFile(std::string path)
     SDL_FreeSurface(loadedSurface);
 
     texture_ = newTexture;
-    return ((texture_ != NULL_PTR) ? OS_OK : OS_ERROR);
+    return OS_OK;
 }
 
 UINT32 DispTexture::createTextureFromRenderText(std::string textureText, SDL_Color textColor)
@@ -193,7 +194,7 @@ UINT32 DispTexture::createTextureFromRenderText(std::string textureText, SDL_Col
     return ((texture_ != NULL_PTR) ? OS_OK : OS_ERROR);
 }
         
-UINT32 DispTexture::createTexture(int width, int height, SDL_TextureAccess access)
+UINT32 DispTexture::createTexture(INT32 width, INT32 height, SDL_TextureAccess access)
 {
     //Create uninitialized texture
     texture_ = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_RGBA8888, access, width, height);
@@ -221,7 +222,19 @@ void DispTexture::freeTexture()
     }
 }
 
-void DispTexture::setColor(Uint8 red, Uint8 green, Uint8 blue)
+void DispTexture::clearScreen()
+{
+    //Clear screen
+    SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF );
+    SDL_RenderClear(renderer_);
+}
+
+void DispTexture::updateScreen()
+{
+    SDL_RenderPresent(renderer_);
+}
+
+void DispTexture::setColor(UINT8 red, UINT8 green, UINT8 blue)
 {
     //Modulate texture rgb
     SDL_SetTextureColorMod(texture_, red, green, blue);
@@ -233,13 +246,13 @@ void DispTexture::setBlendMode(SDL_BlendMode blending)
     SDL_SetTextureBlendMode(texture_, blending);
 }
         
-void DispTexture::setAlpha(Uint8 alpha)
+void DispTexture::setAlpha(UINT8 alpha)
 {
     //Modulate texture alpha
     SDL_SetTextureAlphaMod(texture_, alpha);
 }
 
-void DispTexture::render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip)
+void DispTexture::render(INT32 x, INT32 y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip)
 {
     //Set rendering space and render to screen
     SDL_Rect renderQuad = {x, y, width_, height_};
@@ -260,51 +273,49 @@ void DispTexture::setAsRenderTarget()
     SDL_SetRenderTarget(renderer_, texture_);
 }
 
-int DispTexture::getWidth()
+INT32 DispTexture::getWidth()
 {
     return width_;
 }
 
-int DispTexture::getHeight()
+INT32 DispTexture::getHeight()
 {
     return height_;
 }
 
-bool DispTexture::lockTexture()
+UINT32 DispTexture::lockTexture()
 {
     bool ret = true;
 
     //Texture is already locked
     if (pixels_ != NULL_PTR) {
         printf("Texture is already locked!\n");
-        ret = false;
-    } else {
-        //Lock texture
-        if (SDL_LockTexture(texture_, NULL_PTR, &pixels_, &pitch_) != 0) {
-            printf("Unable to lock texture! %s\n", SDL_GetError());
-            ret = false;
-        }
+        return OS_ERROR;
     }
 
-    return ret;
+    //Lock texture
+    if (SDL_LockTexture(texture_, NULL_PTR, &pixels_, &pitch_) != 0) {
+        printf("Unable to lock texture! %s\n", SDL_GetError());
+        return OS_ERROR;
+    }
+
+    return OS_OK;
 }
 
-bool DispTexture::unlockTexture()
+UINT32 DispTexture::unlockTexture()
 {
-    bool ret = true;
-
     //Texture is not locked
     if (pixels_ == NULL_PTR) {
         printf("Texture is not locked!\n");
-        ret = false;
-    } else {
-        //Unlock texture
-        SDL_UnlockTexture(texture_);
-        pixels_ = NULL_PTR;
-        pitch_ = 0;
+        return OS_ERROR;
     }
 
-    return ret;
+    //Unlock texture
+    SDL_UnlockTexture(texture_);
+    pixels_ = NULL_PTR;
+    pitch_ = 0;
+
+    return OS_OK;
 }
 
 void* DispTexture::getPixels()
@@ -321,15 +332,15 @@ void DispTexture::copyPixels(void* pixels)
     }
 }
 
-int DispTexture::getPitch()
+INT32 DispTexture::getPitch()
 {
     return pitch_;
 }
 
-UINT32 DispTexture::getPixel32(unsigned int x, unsigned int y)
+INT32 DispTexture::getPixel32(INT32 x, INT32 y)
 {
     //Convert the pixels to 32 bit
-    UINT32 *pixels = (UINT32*)pixels_;
+    INT32 *pixels = (INT32*)pixels_;
 
     //Get the pixel requested
     return pixels[(y * (pitch_ / 4)) + x];

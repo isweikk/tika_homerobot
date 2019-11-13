@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string>
 
-#include "disp_texture.h"
+#include "disp/inc/disp_texture.h"
 
 //The protective mutex
 SDL_mutex* gBufferLock = NULL;
@@ -150,7 +150,7 @@ int main( int argc, char* args[] )
     }
     
     //Load media
-    if (!dispTexture.createTextureFromFile("./res/img/background.png")) {
+    if (dispTexture.createTextureFromFile("./res/img/background.png") != OS_OK) {
         printf("Failed to load media!\n");
         dispTexture.closeWindow();
         return 0;
@@ -181,14 +181,13 @@ int main( int argc, char* args[] )
         }
 
         //Clear screen
-        SDL_SetRenderDrawColor(dispTexture.renderer_, 0xFF, 0xFF, 0xFF, 0xFF );
-        SDL_RenderClear( dispTexture.renderer_ );
+        dispTexture.clearScreen();
 
         //Render splash
         dispTexture.render( 0, 0 );
 
         //Update screen
-        SDL_RenderPresent(dispTexture.renderer_);
+        dispTexture.updateScreen();
         SDL_Delay(25);
     }
 
