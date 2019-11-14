@@ -28,11 +28,11 @@ DispTexture::DispTexture()
 DispTexture::~DispTexture()
 {
     //Deallocate
-    freeTexture();
-    closeWindow();
+    FreeTexture();
+    CloseWindow();
 }
 
-UINT32 DispTexture::openWindow()
+UINT32 DispTexture::OpenWindow()
 {
     //Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -48,7 +48,7 @@ UINT32 DispTexture::openWindow()
     window_ = SDL_CreateWindow("Tika", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
         SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_FULLSCREEN);
     if (window_ == NULL_PTR) {
-        closeWindow();
+        CloseWindow();
         printf("Window could not be created! SDL Error: %s\n", SDL_GetError());
         return OS_ERROR;
     }
@@ -56,7 +56,7 @@ UINT32 DispTexture::openWindow()
     //Create renderer for window
     renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (renderer_ == NULL_PTR) {
-        closeWindow();
+        CloseWindow();
         printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
         return OS_ERROR;
     }
@@ -67,7 +67,7 @@ UINT32 DispTexture::openWindow()
     //Initialize PNG loading
     int32_t imgFlags = IMG_INIT_PNG;
     if (!(IMG_Init(imgFlags) & imgFlags)) {
-        closeWindow();
+        CloseWindow();
         printf("SDL_image could not initialize! %s\n", IMG_GetError());
         return OS_ERROR;
     }
@@ -75,7 +75,7 @@ UINT32 DispTexture::openWindow()
     return OS_OK;
 }
 
-void DispTexture::closeWindow()
+void DispTexture::CloseWindow()
 {
     //Destroy window
     if (renderer_) {
@@ -92,10 +92,10 @@ void DispTexture::closeWindow()
     SDL_Quit();
 }
 
-UINT32 DispTexture::createTextureFromFile(std::string path)
+UINT32 DispTexture::CreateTextureFromFile(std::string path)
 {
     //Get rid of preexisting texture
-    freeTexture();
+    FreeTexture();
 
     //The final texture
     SDL_Texture* newTexture = NULL_PTR;
@@ -164,11 +164,11 @@ UINT32 DispTexture::createTextureFromFile(std::string path)
     return OS_OK;
 }
 
-UINT32 DispTexture::createTextureFromRenderText(std::string textureText, SDL_Color textColor)
+UINT32 DispTexture::CreateTextureFromRenderText(std::string textureText, SDL_Color textColor)
 {
 #if defined(SDL_TTF_H_) || defined(SDL_TTF_H)
     //Get rid of preexisting texture
-    freeTexture();
+    FreeTexture();
 
     //Render text surface
     SDL_Surface* textSurface = TTF_RenderText_Solid(font_, textureText.c_str(), textColor);
@@ -194,7 +194,7 @@ UINT32 DispTexture::createTextureFromRenderText(std::string textureText, SDL_Col
     return ((texture_ != NULL_PTR) ? OS_OK : OS_ERROR);
 }
         
-UINT32 DispTexture::createTexture(INT32 width, INT32 height, SDL_TextureAccess access)
+UINT32 DispTexture::CreateTexture(INT32 width, INT32 height, SDL_TextureAccess access)
 {
     //Create uninitialized texture
     texture_ = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_RGBA8888, access, width, height);
@@ -209,7 +209,7 @@ UINT32 DispTexture::createTexture(INT32 width, INT32 height, SDL_TextureAccess a
     return OS_OK;
 }
 
-void DispTexture::freeTexture()
+void DispTexture::FreeTexture()
 {
     //Free texture if it exists
     if (texture_ != NULL_PTR) {
@@ -222,37 +222,37 @@ void DispTexture::freeTexture()
     }
 }
 
-void DispTexture::clearScreen()
+void DispTexture::ClearScreen()
 {
     //Clear screen
     SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF );
     SDL_RenderClear(renderer_);
 }
 
-void DispTexture::updateScreen()
+void DispTexture::UpdateScreen()
 {
     SDL_RenderPresent(renderer_);
 }
 
-void DispTexture::setColor(UINT8 red, UINT8 green, UINT8 blue)
+void DispTexture::SetColor(UINT8 red, UINT8 green, UINT8 blue)
 {
     //Modulate texture rgb
     SDL_SetTextureColorMod(texture_, red, green, blue);
 }
 
-void DispTexture::setBlendMode(SDL_BlendMode blending)
+void DispTexture::SetBlendMode(SDL_BlendMode blending)
 {
     //Set blending function
     SDL_SetTextureBlendMode(texture_, blending);
 }
         
-void DispTexture::setAlpha(UINT8 alpha)
+void DispTexture::SetAlpha(UINT8 alpha)
 {
     //Modulate texture alpha
     SDL_SetTextureAlphaMod(texture_, alpha);
 }
 
-void DispTexture::render(INT32 x, INT32 y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip)
+void DispTexture::Render(INT32 x, INT32 y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip)
 {
     //Set rendering space and render to screen
     SDL_Rect renderQuad = {x, y, width_, height_};
@@ -267,23 +267,23 @@ void DispTexture::render(INT32 x, INT32 y, SDL_Rect* clip, double angle, SDL_Poi
     SDL_RenderCopyEx(renderer_, texture_, clip, &renderQuad, angle, center, flip);
 }
 
-void DispTexture::setAsRenderTarget()
+void DispTexture::SetAsRenderTarget()
 {
     //Make self render target
     SDL_SetRenderTarget(renderer_, texture_);
 }
 
-INT32 DispTexture::getWidth()
+INT32 DispTexture::GetWidth()
 {
     return width_;
 }
 
-INT32 DispTexture::getHeight()
+INT32 DispTexture::GetHeight()
 {
     return height_;
 }
 
-UINT32 DispTexture::lockTexture()
+UINT32 DispTexture::LockTexture()
 {
     bool ret = true;
 
@@ -302,7 +302,7 @@ UINT32 DispTexture::lockTexture()
     return OS_OK;
 }
 
-UINT32 DispTexture::unlockTexture()
+UINT32 DispTexture::UnlockTexture()
 {
     //Texture is not locked
     if (pixels_ == NULL_PTR) {
@@ -318,12 +318,12 @@ UINT32 DispTexture::unlockTexture()
     return OS_OK;
 }
 
-void* DispTexture::getPixels()
+void* DispTexture::GetPixels()
 {
     return pixels_;
 }
 
-void DispTexture::copyPixels(void* pixels)
+void DispTexture::CopyPixels(void* pixels)
 {
     //Texture is locked
     if (pixels_ != NULL_PTR) {
@@ -332,12 +332,12 @@ void DispTexture::copyPixels(void* pixels)
     }
 }
 
-INT32 DispTexture::getPitch()
+INT32 DispTexture::GetPitch()
 {
     return pitch_;
 }
 
-INT32 DispTexture::getPixel32(INT32 x, INT32 y)
+INT32 DispTexture::GetPixel32(INT32 x, INT32 y)
 {
     //Convert the pixels to 32 bit
     INT32 *pixels = (INT32*)pixels_;

@@ -144,15 +144,15 @@ int main( int argc, char* args[] )
     DispTexture dispTexture;
     
     //Start up SDL and create window
-    if (dispTexture.openWindow() != OS_OK) {
+    if (dispTexture.OpenWindow() != OS_OK) {
         printf( "Failed to initialize!\n" );
-        dispTexture.closeWindow();
+        dispTexture.CloseWindow();
     }
     
     //Load media
-    if (dispTexture.createTextureFromFile("./res/img/background.png") != OS_OK) {
+    if (dispTexture.CreateTextureFromFile("./res/img/background.png") != OS_OK) {
         printf("Failed to load media!\n");
-        dispTexture.closeWindow();
+        dispTexture.CloseWindow();
         return 0;
     }
 
@@ -181,13 +181,13 @@ int main( int argc, char* args[] )
         }
 
         //Clear screen
-        dispTexture.clearScreen();
+        dispTexture.ClearScreen();
 
         //Render splash
-        dispTexture.render( 0, 0 );
+        dispTexture.Render(0, 0);
 
         //Update screen
-        dispTexture.updateScreen();
+        dispTexture.UpdateScreen();
         SDL_Delay(25);
     }
 
@@ -197,8 +197,8 @@ int main( int argc, char* args[] )
     deinit();
     
     //Free resources and close SDL
-    dispTexture.freeTexture();
-    dispTexture.closeWindow();
+    dispTexture.FreeTexture();
+    dispTexture.CloseWindow();
 
     return 0;
 }
