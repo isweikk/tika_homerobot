@@ -10,6 +10,7 @@ include_directories("./inc/ffmpeg")
 # 包含文件
 set(DISP_SRC
     ./src/disp_texture.cpp
+    ./src/disp_main_ui.cpp
 #    ./src/disp_timer.cpp
 )
 

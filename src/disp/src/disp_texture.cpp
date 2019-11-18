@@ -273,6 +273,16 @@ void DispTexture::SetAsRenderTarget()
     SDL_SetRenderTarget(renderer_, texture_);
 }
 
+void DispTexture::SetDrawColor(UINT8 r, UINT8 g, UINT8 b, UINT8 a)
+{
+    SDL_SetRenderDrawColor(renderer_, r, g, b, a);
+}
+
+INT32 DispTexture::DrawPoint(const SDL_Point *points, INT32 count)
+{
+    return SDL_RenderDrawPoints(renderer_, points, count);
+}
+
 INT32 DispTexture::GetWidth()
 {
     return width_;

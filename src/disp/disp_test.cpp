@@ -7,6 +7,7 @@
 #include <string>
 
 #include "disp/inc/disp_texture.h"
+#include "disp/inc/disp_main_ui.h"
 
 //The protective mutex
 SDL_mutex* gBufferLock = NULL;
@@ -142,6 +143,7 @@ int main( int argc, char* args[] )
 {
     
     DispTexture dispTexture;
+    DispMainUi mainUi;
     
     //Start up SDL and create window
     if (dispTexture.OpenWindow() != OS_OK) {
@@ -166,7 +168,12 @@ int main( int argc, char* args[] )
     //Run the threads
     SDL_Thread* producerThread = SDL_CreateThread( producer, "Producer", NULL );
     SDL_Thread* consumerThread = SDL_CreateThread( consumer, "Consumer", NULL );
-    
+
+    //Clear screen
+    dispTexture.ClearScreen();
+    dispTexture.Render(0, 0);
+
+    mainUi.InitGalaxy(dispTexture);
     //While application is running
     while( !quit )
     {
@@ -181,10 +188,15 @@ int main( int argc, char* args[] )
         }
 
         //Clear screen
-        dispTexture.ClearScreen();
+        //dispTexture.ClearScreen();
 
         //Render splash
-        dispTexture.Render(0, 0);
+        //dispTexture.Render(0, 0);
+        printf("line %d\n", __LINE__);
+        dispTexture.SetDrawColor(255, 0, 0, 255);
+        printf("line %d\n", __LINE__);
+        mainUi.DrawGalaxy(dispTexture);
+        printf("line %d\n", __LINE__);
 
         //Update screen
         dispTexture.UpdateScreen();

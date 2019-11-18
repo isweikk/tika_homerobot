@@ -6,6 +6,19 @@
 
 class DispMainUi{
 public:
+    DispMainUi(){};
+    ~DispMainUi()
+    {
+        //FreeGalaxy();
+    };
+
+    UINT32 InitGalaxy(DispTexture &win);
+    void DrawGalaxy(DispTexture &win);
+
+//protected:
+    void FreeGalaxy(DispTexture &win);
+    void StartOver(DispTexture &win);
+    void RefreshGalaxy(DispTexture &win);
 
 private:
     class Universe;

@@ -2,7 +2,8 @@
  * 描述：主画面，Galaxy效果
  * 说明：参考地址https://linux.die.net/man/6/galaxy
  */
- 
+#include "disp_main_ui.h"
+
 #include <SDL.h>
 #include <SDL_thread.h>
 #include <SDL_image.h>
@@ -22,17 +23,55 @@
 # define release_galaxy 0
 # define reshape_galaxy 0
 # define galaxy_handle_event 0
-# include "xlockmore.h"
 
-static Bool tracks;
-static Bool spin;
-static Bool dbufp;
+static bool tracks;
+static bool spin;
+static bool dbufp;
 
 #define DEF_TRACKS "True"
 #define DEF_SPIN   "True"
 #define DEF_DBUF   "True"
 
-#define LRAND()         ((long) (random() & 0x7fffffff))
+#define VectorSize 55
+static unsigned int a[VectorSize] = {
+        035340171546, 010401501101, 022364657325, 024130436022, 002167303062, /*  5 */
+        037570375137, 037210607110, 016272055420, 023011770546, 017143426366, /* 10 */
+        014753657433, 021657231332, 023553406142, 004236526362, 010365611275, /* 14 */
+        007117336710, 011051276551, 002362132524, 001011540233, 012162531646, /* 20 */
+        007056762337, 006631245521, 014164542224, 032633236305, 023342700176, /* 25 */
+        002433062234, 015257225043, 026762051606, 000742573230, 005366042132, /* 30 */
+        012126416411, 000520471171, 000725646277, 020116577576, 025765742604, /* 35 */
+        007633473735, 015674255275, 017555634041, 006503154145, 021576344247, /* 40 */
+        014577627653, 002707523333, 034146376720, 030060227734, 013765414060, /* 45 */
+        036072251540, 007255221037, 024364674123, 006200353166, 010126373326, /* 50 */
+        015664104320, 016401041535, 016215305520, 033115351014, 017411670323  /* 55 */
+};
+
+static int i1, i2;
+
+unsigned int ya_random (void)
+{
+    register int ret = a[i1] + a[i2];
+    a[i1] = ret;
+    if (++i1 >= VectorSize) i1 = 0;
+    if (++i2 >= VectorSize) i2 = 0;
+    return ret;
+}
+
+#define SINF(n)			((float)sin((double)(n)))
+#define COSF(n)			((float)cos((double)(n)))
+#define FABSF(n)		((float)fabs((double)(n)))
+
+#undef MAX
+#undef MIN
+#undef ABS
+#define MAX(a,b)((a)>(b)?(a):(b))
+#define MIN(a,b)((a)<(b)?(a):(b))
+#define ABS(a)((a)<0 ? -(a) : (a))
+
+#define LRAND()         ((long) (ya_random() & 0x7fffffff))
+#define NRAND(n)       ((int) (LRAND() % (n)))
+#define MAXRAND         (2147483648.0) /* unsigned 1<<31 as a float */
 #define FLOAT_RAND_NUM ((double) LRAND() / ((double) MAXRAND))
 
 #if 0
@@ -68,39 +107,39 @@ static Bool dbufp;
 
 typedef struct {
     double pos[3], vel[3];
-    short oldX, oldY;
-    short newX, newY;
 } Star;
 
 typedef struct {
-    short x, y;
-} XPoint;
+    int x, y;
+} Point;
 
 typedef struct {
     int         mass;
     int         nstars;
     Star       *stars;
+    Point      *oldPoints;
+    Point      *newPoints;
     double      pos[3], vel[3];
     int         galcol;
 } Galaxy;
 
-typedef struct {
-    double      mat[3][3]; // Movement of stars(?)
-    double      scale; // Scale
-    int         midx; // Middle of screen, x
-    int         midy; // Middle of screen, y
-    double      size; //
-    double      diff[3];
-    Galaxy     *galaxies; // the Whole Universe */
-    int         ngalaxies; // # galaxies
-    int         f_hititerations; // # iterations before restart
-    int         step;
-    double      rot_y; // rotation of eye around center of universe, around y-axis
-    double      rot_x; // rotation of eye around center of universe, around x-axis
-} Universe;
+//typedef struct {
+//    double      mat[3][3]; // Movement of stars(?)
+//    double      scale; // Scale
+//    int         midx; // Middle of screen, x
+//    int         midy; // Middle of screen, y
+//    double      size; //
+//    double      diff[3];
+//    Galaxy     *galaxies; // the Whole Universe */
+//    int         ngalaxies; // # galaxies
+//    int         f_hititerations; // # iterations before restart
+//    int         step;
+//    double      rot_y; // rotation of eye around center of universe, around y-axis
+//    double      rot_x; // rotation of eye around center of universe, around x-axis
+//} Universe;
 
 class DispMainUi::Universe {
-protected:
+public:
     double      mat[3][3]; // Movement of stars(?)
     double      scale; // Scale
     int         midx; // Middle of screen, x
@@ -120,17 +159,21 @@ protected:
 void DispMainUi::FreeGalaxy(DispTexture &win)
 {
     if (universe_->galaxies != NULL) {
-        int i;
-
-        for (i = 0; i < gp->ngalaxies; i++) {
-            Galaxy *gt = &gp->galaxies[i];
+        for (int i = 0; i < universe_->ngalaxies; i++) {
+            Galaxy *gt = &universe_->galaxies[i];
 
             if (gt->stars != NULL) {
                 delete[] gt->stars;
             }
+            if (gt->oldPoints != NULL) {
+                delete[] gt->oldPoints;
+            }
+            if (gt->newPoints != NULL) {
+                delete[] gt->newPoints;
+            }
         }
-        delete[] gp->galaxies;
-        gp->galaxies = NULL;
+        delete[] universe_->galaxies;
+        universe_->galaxies = NULL;
     }
 }
 
@@ -174,6 +217,8 @@ void DispMainUi::StartOver(DispTexture &win)
         }
         gt->nstars = (NRAND(MAX_STARS / 2)) + MAX_STARS / 2;
         gt->stars = new Star[gt->nstars]();
+        gt->oldPoints = new Point[gt->nstars]();
+        gt->newPoints = new Point[gt->nstars]();
 
         w1 = 2.0 * M_PI * FLOAT_RAND_NUM;
         w2 = 2.0 * M_PI * FLOAT_RAND_NUM;
@@ -205,6 +250,8 @@ void DispMainUi::StartOver(DispTexture &win)
 
         for (j = 0; j < gt->nstars; ++j) {
             Star       *st = &gt->stars[j];
+            Point *oldp = &gt->oldPoints[j];
+            Point *newp = &gt->newPoints[j];
             double      sinw, cosw;
 
             w = 2.0 * M_PI * FLOAT_RAND_NUM;
@@ -229,10 +276,10 @@ void DispMainUi::StartOver(DispTexture &win)
             st->vel[0] *= DELTAT;
             st->vel[1] *= DELTAT;
             st->vel[2] *= DELTAT;
-            st->oldX = 0;
-            st->oldY = 0;
-            st->newX = 0;
-            st->newY = 0;
+            oldp->x = 0;
+            oldp->y = 0;
+            newp->x = 0;
+            newp->y = 0;
         }
     }
 
@@ -245,7 +292,7 @@ void DispMainUi::StartOver(DispTexture &win)
 #endif /*0 */
 }
 
-void DispMainUi::InitGalaxy(DispTexture &win)
+UINT32 DispMainUi::InitGalaxy(DispTexture &win)
 {
     Universe  *universe_;
 
@@ -261,13 +308,12 @@ void DispMainUi::InitGalaxy(DispTexture &win)
     universe_->midx =  win.GetWidth()  / 2;
     universe_->midy =  win.GetHeight() / 2;
     StartOver(win);
+
+    return OS_OK;
 }
 
-void DrawGalaxy(DispTexture &win)
+void DispMainUi::DrawGalaxy(DispTexture &win)
 {
-    Display    *display = MI_DISPLAY(mi);
-    Window      window = MI_WINDOW(mi);
-    GC          gc = MI_GC(mi);
     double      d, eps, cox, six, cor, sir;  /* tmp */
     int         i, j, k; /* more tmp */
 
@@ -288,6 +334,7 @@ void DrawGalaxy(DispTexture &win)
 
         for (j = 0; j < universe_->galaxies[i].nstars; ++j) {
             Star       *st = &gt->stars[j];
+            Point *newp = &gt->newPoints[j];
             double      v0 = st->vel[0];
             double      v1 = st->vel[1];
             double      v2 = st->vel[2];
@@ -316,8 +363,8 @@ void DrawGalaxy(DispTexture &win)
             st->pos[1] += v1;
             st->pos[2] += v2;
 
-            st->newX = (short) (((cox * st->pos[0]) - (six * st->pos[2])) * universe_->scale) + universe_->midx;
-            st->newY = (short) (((cor * st->pos[1]) - (sir * ((six * st->pos[0]) + (cox * st->pos[2]))))
+            newp->x = (short) (((cox * st->pos[0]) - (six * st->pos[2])) * universe_->scale) + universe_->midx;
+            newp->y = (short) (((cor * st->pos[1]) - (sir * ((six * st->pos[0]) + (cox * st->pos[2]))))
                                * universe_->scale) + universe_->midy;
         }
 
@@ -350,24 +397,18 @@ void DrawGalaxy(DispTexture &win)
         gt->pos[2] += gt->vel[2] * DELTAT;
 
         // 如果使用双缓冲，执行下方4行
-        if (dbufp) {
-            XSetForeground(display, gc, MI_WIN_BLACK_PIXEL(mi));
-            XDrawPoints(display, window, gc, gt->stars, gt->nstars, CoordModeOrigin);
-        }
-        XSetForeground(display, gc, MI_PIXEL(mi, COLORSTEP * gt->galcol));
-        XDrawPoints(display, window, gc, gt->stars, gt->nstars, CoordModeOrigin);
+//        if (dbufp) {
+//            XSetForeground(display, gc, MI_WIN_BLACK_PIXEL(mi));
+//            XDrawPoints(display, window, gc, gt->oldPoints, gt->nstars, CoordModeOrigin);
+//        }
+//        XSetForeground(display, gc, MI_PIXEL(mi, COLORSTEP * gt->galcol));
+//        XDrawPoints(display, window, gc, gt->newPoints, gt->nstars, CoordModeOrigin);
+        win.DrawPoint((SDL_Point *)gt->newPoints, gt->nstars);
 
-        // 已经显示的新坐标点，存入旧坐标点。双缓冲机制
-        short tmp;
-        for (j = 0; j < universe_->galaxies[i].nstars; ++j) {
-            Star *st = &gt->stars[j];
-            tmp = st->oldX;
-            st->oldX = st->newX;
-            st->newX = tmp;
-            tmp = st->oldY;
-            st->oldY = st->newY;
-            st->newY = tmp;
-        }
+        // 新坐标点和旧坐标点交换存储。双缓冲机制
+        Point *dummy = gt->oldPoints;
+        gt->oldPoints = gt->newPoints;
+        gt->newPoints = dummy;
     }
 
     universe_->step++;
@@ -376,3 +417,7 @@ void DrawGalaxy(DispTexture &win)
     }
 }
 
+void DispMainUi::RefreshGalaxy(DispTexture &win)
+{
+
+}

@@ -53,6 +53,10 @@ public:
     //Set self as render target
     void SetAsRenderTarget();
 
+    // set pen color
+    void SetDrawColor(UINT8 r, UINT8 g, UINT8 b, UINT8 a);
+    INT32 DrawPoint(const SDL_Point *points, INT32 count);
+
     //Gets image dimensions
     INT32 GetWidth();
     INT32 GetHeight();
